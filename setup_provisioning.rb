@@ -93,8 +93,8 @@ KERNEL boot/discovery-vmlinuz
 APPEND rootflags=loop initrd=boot/discovery-initrd.img root=live:/foreman.iso rootfstype=auto ro rd.live.image rd.live.check rd.lvm=0 rootflags=ro crashkernel=128M elevator=deadline max_loop=256 rd.luks=0 rd.md=0 rd.dm=0 foreman.url=#{FOREMAN_URL} nomodeset selinux=0 stateless
 EOS
 
-foreman.config_template.show_or_ensure({'id' => name},
-                                       {'template' => template})
+discovery_template = foreman.config_template.show_or_ensure({'id' => name},
+                                                            {'template' => template})
 
 foreman.config_template.build_pxe_default
 
@@ -156,5 +156,15 @@ default_hostgroup = foreman.hostgroup.show_or_ensure({'id' => 'base'},
 
 foreman.setting.show_or_ensure({'id' => 'base_hostgroup'},
                                {'value' => default_hostgroup['name'].to_s})
+
+# staypuft specific configuration
+discovery_env = foreman.environment.show_or_ensure({'id' => 'discovery'},
+                                                   {'name' => 'discovery'})
+existing = foreman.template_combination.index('config_template_id' => discovery_template['id']).any? do |combination|
+  combination['environemnt_name'] == 'discovery'
+end
+unless existing
+  foreman.template_combination.create 'template_combination' => {'environment_id' => discovery_env['id']}, 'config_template_id' => discovery_template['id']
+end
 
 puts "Your system is ready to provision using '#{default_hostgroup['name']}' hostgroup"

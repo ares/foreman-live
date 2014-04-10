@@ -13,6 +13,7 @@ class Foreman
       :hostgroup => 'Hostgroup',
       :environment => 'Environment',
       :setting => 'Setting',
+      :template_combination => 'TemplateCombination',
   }
 
   def initialize(options)
